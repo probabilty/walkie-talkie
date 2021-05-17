@@ -39,12 +39,14 @@ func main() {
 		go func() {
 			if frame.IsInACall(addr.Network()) {
 				frame.Relay(connection, addr.Network(), (buffer[0:n]))
+				frame.SendOK(connection, addr)
 				return
 			}
 			if strings.HasPrefix(string(buffer[0:n]), "Dial") {
 				channel := strings.Split(string(buffer[0:n]), " ")
 				if len(channel) == 2 {
 					frame.Dial(addr.Network(), channel[1])
+					frame.SendOK(connection, addr)
 				}
 			}
 			if strings.HasPrefix(string(buffer[0:n]), "Register") {
@@ -52,6 +54,7 @@ func main() {
 				for i := 1; i < len(channel); i++ {
 					phonebook.Register(addr, channel[i])
 				}
+				frame.SendOK(connection, addr)
 			}
 		}()
 	}

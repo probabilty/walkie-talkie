@@ -58,3 +58,10 @@ func Relay(conn *net.UDPConn, addr string, data []byte) {
 	}
 
 }
+func SendOK(conn *net.UDPConn, addr *net.UDPAddr) {
+	connMutex.Lock()
+	// deadline := time.Now().Add(time.Second)
+	// conn.SetReadDeadline(deadline)
+	conn.WriteToUDP([]byte("ok"), addr)
+	connMutex.Unlock()
+}
