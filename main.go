@@ -40,7 +40,6 @@ func main() {
 		go func() {
 			if frame.IsInACall(addr.Network()) {
 				frame.Relay(connection, addr.Network(), (buffer[0:n]))
-				frame.SendOK(connection, addr)
 				return
 			}
 			if strings.HasPrefix(string(buffer[0:n]), "Dial") {
