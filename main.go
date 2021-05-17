@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 	"strings"
-	"udb/frame"
-	"udb/phonebook"
+	"walki-talki/frame"
+	"walki-talki/phonebook"
 )
 
 func init() {
