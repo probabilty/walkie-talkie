@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"walki-talki/frame"
@@ -47,6 +48,7 @@ func main() {
 				if len(channel) == 2 {
 					frame.Dial(addr.Network(), channel[1])
 					frame.SendOK(connection, addr)
+					log.Println("hello")
 				}
 			}
 			if strings.HasPrefix(string(buffer[0:n]), "Register") {
