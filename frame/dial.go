@@ -20,7 +20,9 @@ func Dial(addr string, channel string) {
 	if activeCalls[addr] != channel {
 		Hungup(addr)
 	}
+	frameMutex.Lock()
 	activeCalls[addr] = channel
+	frameMutex.Unlock()
 }
 func IsInACall(addr string) bool {
 	if activeCalls[addr] != "" {

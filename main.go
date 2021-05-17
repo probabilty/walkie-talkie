@@ -43,7 +43,7 @@ func main() {
 			}
 			if strings.HasPrefix(string(buffer[0:n]), "Dial") {
 				channel := strings.Split(string(buffer[0:n]), " ")
-				if len(channel) != 0 {
+				if len(channel) == 2 {
 					frame.Dial(addr.Network(), channel[1])
 				}
 			}
