@@ -62,6 +62,6 @@ func SendOK(conn *net.UDPConn, addr *net.UDPAddr) {
 	connMutex.Lock()
 	// deadline := time.Now().Add(time.Second)
 	// conn.SetReadDeadline(deadline)
-	conn.WriteToUDP([]byte("ok"), addr)
+	conn.WriteToUDP([]byte("ok\n"), addr)
 	connMutex.Unlock()
 }
