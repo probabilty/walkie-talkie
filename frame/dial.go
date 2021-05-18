@@ -41,10 +41,10 @@ func IsInACall(addr string) bool {
 	return false
 }
 func Hungup(conn *net.UDPConn, addr string) {
-	frameMutex.Lock()
 	deadline := time.Now().Add(time.Second)
 	conn.SetWriteDeadline(deadline)
 	conn.WriteToUDP([]byte("ok\n"), getAddress(addr))
+	frameMutex.Lock()
 	delete(activeCalls, addr)
 	frameMutex.Unlock()
 }

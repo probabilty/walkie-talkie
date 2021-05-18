@@ -28,7 +28,7 @@ func main() {
 	phonebook.Init()
 	frame.Init(connection)
 	defer connection.Close()
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 10240000)
 	for {
 		n, addr, err := connection.ReadFromUDP(buffer)
 		if err != nil {
