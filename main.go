@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"walki-talki/frame"
@@ -10,8 +9,7 @@ import (
 )
 
 func init() {
-	phonebook.Init()
-	frame.Init()
+
 }
 func main() {
 	PORT := ":8844"
@@ -27,7 +25,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
+	phonebook.Init()
+	frame.Init(connection)
 	defer connection.Close()
 	buffer := make([]byte, 1024)
 	for {
@@ -36,22 +35,20 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Print("-> ", string(buffer[0:n]))
 		go func() {
-			if frame.IsInACall(addr.Network()) {
-				frame.Relay(connection, addr.Network(), (buffer[0:n]))
+			if frame.IsInACall(addr.String()) {
+				frame.Relay(connection, addr.String(), (buffer[0 : n-1]))
 				return
 			}
-			if strings.HasPrefix(string(buffer[0:n]), "Dial") {
-				channel := strings.Split(string(buffer[0:n]), " ")
+			if strings.HasPrefix(string(buffer[0:n-1]), "Dial") {
+				channel := strings.Split(string(buffer[0:n-1]), " ")
 				if len(channel) == 2 {
-					frame.Dial(addr.Network(), channel[1])
+					frame.Dial(connection, addr.String(), channel[1])
 					frame.SendOK(connection, addr)
-					log.Println("hello")
 				}
 			}
-			if strings.HasPrefix(string(buffer[0:n]), "Register") {
-				channel := strings.Split(string(buffer[0:n]), " ")
+			if strings.HasPrefix(string(buffer[0:n-1]), "Register") {
+				channel := strings.Split(string(buffer[0:n-1]), " ")
 				for i := 1; i < len(channel); i++ {
 					phonebook.Register(addr, channel[i])
 				}
