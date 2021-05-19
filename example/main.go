@@ -1,7 +1,7 @@
 package main
 
-import calls "github.com/probabilty/walkie-talkie"
+import probability "github.com/probabilty/walkie-talkie"
 
 func main() {
-	calls.Serve(":8842")
+	probability.Serve(":8842")
 }
