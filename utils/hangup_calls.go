@@ -2,7 +2,8 @@ package utils
 
 import (
 	"net"
-	"walki-talki/frame"
+
+	"github.com/probabilty/walki-talki/frame"
 )
 
 func Hangupcalls(notifier chan *net.UDPAddr) {

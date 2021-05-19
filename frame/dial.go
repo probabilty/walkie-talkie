@@ -9,7 +9,7 @@ import (
 	"time"
 
 	// "time"
-	"walki-talki/phonebook"
+	"github.com/probabilty/walki-talki/phonebook"
 )
 
 var activeCalls map[string]call
