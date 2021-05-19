@@ -37,6 +37,9 @@ func main() {
 		}
 		go func() {
 			if frame.IsInACall(addr.String()) {
+				// go func() {
+				// 	log.Println(buffer[0 : n-1])
+				// }()
 				frame.Relay(connection, addr.String(), (buffer[0 : n-1]))
 				return
 			}
