@@ -28,18 +28,16 @@ func main() {
 	phonebook.Init()
 	frame.Init(connection)
 	defer connection.Close()
-	buffer := make([]byte, 10240000)
 	for {
+		buffer := make([]byte, 10240000)
+		// fmt.Printf("address of buffer %p  \n", &buffer)
 		n, addr, err := connection.ReadFromUDP(buffer)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		go func() {
+		go func(buffer []byte, addr *net.UDPAddr, n int) {
 			if frame.IsInACall(addr.String()) {
-				// go func() {
-				// 	log.Println(buffer[0 : n-1])
-				// }()
 				frame.Relay(connection, addr.String(), (buffer[0 : n-1]))
 				return
 			}
@@ -57,6 +55,6 @@ func main() {
 				}
 				frame.SendOK(connection, addr)
 			}
-		}()
+		}(buffer, addr, n)
 	}
 }
