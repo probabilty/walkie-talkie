@@ -12,3 +12,4 @@ simple walki-talki server implementation in golang via relaying
 #
 5- hangup by sending the message (Hangup)
 #
+Refer to the examples folder 
