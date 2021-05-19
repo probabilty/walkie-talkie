@@ -45,7 +45,7 @@ func main() {
 				channel := strings.Split(string(buffer[0:n-1]), " ")
 				if len(channel) == 2 {
 					frame.Dial(connection, addr.String(), channel[1])
-					frame.SendOK(connection, addr)
+					// frame.SendOK(connection, addr)
 				}
 			}
 			if strings.HasPrefix(string(buffer[0:n-1]), "Register") {
