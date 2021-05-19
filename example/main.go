@@ -1,6 +1,6 @@
 package main
 
-import "walki-talki/calls"
+import calls "github.com/probabilty/walki-talki"
 
 func main() {
 	calls.Serve(":8842")
