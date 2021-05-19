@@ -1,14 +1,14 @@
-# walki-talki
+# walkie-talkie
 #
 
 #
-simple walki-talki server implementation in golang via relaying
+simple walkie-talkie server implementation in golang via relaying
 #
 #
 #
 install command 
 #
-"go get github.com/probabilty/walki-talki"
+"go get github.com/probabilty/walkie-talkie"
 #
 #
 #

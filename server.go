@@ -6,11 +6,11 @@ import (
 	"net"
 	"strings"
 
-	"github.com/probabilty/walki-talki/frame"
+	"github.com/probabilty/walkie-talkie/frame"
 
-	"github.com/probabilty/walki-talki/utils"
+	"github.com/probabilty/walkie-talkie/utils"
 
-	"github.com/probabilty/walki-talki/phonebook"
+	"github.com/probabilty/walkie-talkie/phonebook"
 )
 
 //Serve Starts a UDP Walki Talki server on port

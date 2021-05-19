@@ -1,3 +1,3 @@
-module github.com/probabilty/walki-talki@v0.1.0
+module github.com/probabilty/walkie-talkie
 
 go 1.15
