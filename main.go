@@ -6,6 +6,7 @@ import (
 	"strings"
 	"walki-talki/frame"
 	"walki-talki/phonebook"
+	"walki-talki/utils"
 )
 
 func init() {
@@ -13,20 +14,20 @@ func init() {
 }
 func main() {
 	PORT := ":8844"
-
+	var hangChan chan *net.UDPAddr = make(chan *net.UDPAddr)
 	s, err := net.ResolveUDPAddr("udp4", PORT)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
 	connection, err := net.ListenUDP("udp4", s)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	phonebook.Init()
+	phonebook.Init(hangChan)
 	frame.Init(connection)
+	go utils.Hangupcalls(hangChan)
 	defer connection.Close()
 	for {
 		buffer := make([]byte, 10240000)
@@ -38,22 +39,20 @@ func main() {
 		}
 		go func(buffer []byte, addr *net.UDPAddr, n int) {
 			if frame.IsInACall(addr.String()) {
-				frame.Relay(connection, addr.String(), (buffer[0 : n-1]))
+				frame.Relay(addr.String(), (buffer[0 : n-1]))
 				return
 			}
 			if strings.HasPrefix(string(buffer[0:n-1]), "Dial") {
 				channel := strings.Split(string(buffer[0:n-1]), " ")
 				if len(channel) == 2 {
-					frame.Dial(connection, addr.String(), channel[1])
+					frame.Dial(addr.String(), channel[1])
 					// frame.SendOK(connection, addr)
 				}
 			}
 			if strings.HasPrefix(string(buffer[0:n-1]), "Register") {
 				channel := strings.Split(string(buffer[0:n-1]), " ")
-				for i := 1; i < len(channel); i++ {
-					phonebook.Register(addr, channel[i])
-				}
-				frame.SendOK(connection, addr)
+				phonebook.Register(addr, channel[1:])
+				frame.SendOK(addr)
 			}
 		}(buffer, addr, n)
 	}

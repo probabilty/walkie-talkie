@@ -12,35 +12,43 @@ import (
 	"walki-talki/phonebook"
 )
 
-var activeCalls map[string]string
+var activeCalls map[string]call
+
+const MAX_CALL_DURATION = 60
+
+type call struct {
+	startedAt time.Time
+	Channel   string
+}
 
 // var connMutex sync.Mutex
 var frameMutex sync.Mutex
+var conn *net.UDPConn
 
-func Init(conn *net.UDPConn) {
-	activeCalls = make(map[string]string)
-	// go func() {
-	// 	for {
-	// 		pingClients(conn)
-	// 	}
-	// }()
+func Init(connetion *net.UDPConn) {
+	conn = connetion
+	activeCalls = make(map[string]call)
+	go durationWatcher()
 }
-func Dial(conn *net.UDPConn, addr string, channel string) {
+func Dial(addr string, channel string) {
 	//check if there is a call currently
-	if activeCalls[addr] != channel {
-		Hungup(conn, addr)
+	if activeCalls[addr].Channel != channel {
+		Hangup(addr)
 	}
 	frameMutex.Lock()
-	activeCalls[addr] = channel
+	activeCalls[addr] = call{
+		Channel:   channel,
+		startedAt: time.Now(),
+	}
 	frameMutex.Unlock()
 }
 func IsInACall(addr string) bool {
-	if activeCalls[addr] != "" {
+	if activeCalls[addr].Channel != "" {
 		return true
 	}
 	return false
 }
-func Hungup(conn *net.UDPConn, addr string) {
+func Hangup(addr string) {
 	deadline := time.Now().Add(time.Second)
 	conn.SetWriteDeadline(deadline)
 	conn.WriteToUDP([]byte("ok\n"), getAddress(addr))
@@ -48,15 +56,15 @@ func Hungup(conn *net.UDPConn, addr string) {
 	delete(activeCalls, addr)
 	frameMutex.Unlock()
 }
-func Relay(conn *net.UDPConn, addr string, data []byte) {
+func Relay(addr string, data []byte) {
 	if string(data) == "Hangup" {
-		Hungup(conn, addr)
+		Hangup(addr)
 		return
 	}
 	callChannel := activeCalls[addr]
-	reciptors := phonebook.Get(callChannel)
+	receptors := phonebook.Get(callChannel.Channel)
 
-	for i := 0; i < len(reciptors); i++ {
+	for i := 0; i < len(receptors); i++ {
 		go func(i int) {
 			if len(data) == 0 {
 				return
@@ -64,50 +72,24 @@ func Relay(conn *net.UDPConn, addr string, data []byte) {
 			// connMutex.Lock()
 			deadline := time.Now().Add(time.Second)
 			conn.SetWriteDeadline(deadline)
-			_, err := conn.WriteTo(data, reciptors[i])
+			_, err := conn.WriteTo(data, receptors[i])
 			// connMutex.Unlock()
 			if err != nil {
 				log.Println(err)
-				Hungup(conn, addr)
+				Hangup(addr)
 				return
 			}
 		}(i)
 	}
 
 }
-func SendOK(conn *net.UDPConn, addr *net.UDPAddr) {
+func SendOK(addr *net.UDPAddr) {
 	// connMutex.Lock()
 	deadline := time.Now().Add(time.Second)
 	conn.SetWriteDeadline(deadline)
 	conn.WriteToUDP([]byte("ok\n"), addr)
-	// connMutex.Unlock()
 }
-func pingClients(conn *net.UDPConn) {
-	for k := range activeCalls {
-		parts := strings.SplitAfter(k, ":")
-		port := parts[1]
-		portNum, _ := strconv.Atoi(port)
-		parts[0] = strings.TrimSuffix(parts[0], ":")
-		// ip := net.ParseIP(parts[0])
-		ip := net.ParseIP("10.15.14.30")
-		// zone := net.parseIPZone(parts[0])
-		deadline := time.Now().Add(time.Second)
-		conn.SetWriteDeadline(deadline)
-		n, err := conn.WriteToUDP([]byte("ok\n"), &net.UDPAddr{
-			IP:   ip,
-			Port: portNum,
-			Zone: "",
-		})
-		// connMutex.Unlock()
-		if err != nil || n == 0 {
-			frameMutex.Lock()
-			delete(activeCalls, k)
-			frameMutex.Unlock()
-		}
-	}
-	log.Printf("%+v\n", activeCalls)
-	time.Sleep(5 * time.Second)
-}
+
 func getAddress(add string) (addr *net.UDPAddr) {
 	parts := strings.SplitAfter(add, ":")
 	port := parts[1]
@@ -120,5 +102,14 @@ func getAddress(add string) (addr *net.UDPAddr) {
 		Zone: "",
 	}
 	return
-
+}
+func durationWatcher() {
+	for {
+		time.Sleep(time.Minute)
+		for key := range activeCalls {
+			if time.Since(activeCalls[key].startedAt) >= time.Minute {
+				Hangup(key)
+			}
+		}
+	}
 }
